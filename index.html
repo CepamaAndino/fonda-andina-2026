@@ -1,1 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fonda Andina 2026 — CEPAMA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap');
 
+:root{
+  --night: #1B2A4A;
+  --night-2: #223759;
+  --terracota: #C1502E;
+  --terracota-dark: #9E3E22;
+  --oro: #E8A93B;
+  --cactus: #5B7B4F;
+  --cielo: #3A6EA5;
+  --papel: #FBF3E7;
+  --papel-2: #F3E6D2;
+  --tinta: #241A12;
+  --ok: #5B7B4F;
+  --ok-bg: #E7EEE3;
+  --err: #B23A2E;
+  --err-bg: #F7E4E0;
+  font-family: 'Inter', sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--papel);
+  color:var(--tinta);
+  min-height:100vh;
+}
+.picado{
+  height:14px;
+  background:
+    linear-gradient(135deg, var(--terracota) 25%, transparent 25%) -7px 0,
+    linear-gradient(225deg, var(--terracota) 25%, transparent 25%) -7px 0,
+    linear-gradient(315deg, var(--terracota) 25%, transparent 25%) 0 0,
+    linear-gradient(45deg, var(--terracota) 25%, transparent 25%) 0 0;
+  background-size: 14px 14px;
+  background-color: var(--oro);
+}
+header.hero{
+  background: var(--night);
+  background-image: radial-gradient(circle at 15% 20%, rgba(232,169,59,0.15), transparent 40%),
+                     radial-gradient(circle at 85% 80%, rgba(58,110,165,0.25), transparent 45%);
+  color: var(--papel);
+  padding: 40px 24px 32px;
+  text-align:center;
+  position:relative;
+}
+header.hero .eyebrow{
+  font-family:'Inter';
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  font-size:12px;
+  color: var(--oro);
+  margin-bottom:10px;
+}
+header.hero h1{
+  font-family:'Fraunces', serif;
+  font-weight:900;
+  font-size: clamp(30px, 6vw, 52px);
+  margin: 0 0 8px;
+  line-height:1.02;
+}
+header.hero h1 span{ color: var(--oro); }
+header.hero p{
+  font-size:15px;
+  margin: 4px 0 0;
+  opacity:.85;
+}
+nav.tabs{
+  display:flex;
+  gap:0;
+  max-width:900px;
+  margin: -20px auto 0;
+  background: var(--papel);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(27,42,74,0.18);
+  overflow:hidden;
+  position:relative;
+  z-index:2;
+  flex-wrap:wrap;
+}
+nav.tabs button{
+  flex:1;
+  min-width:150px;
+  border:none;
+  background: transparent;
+  padding:16px 10px;
+  font-family:'Inter';
+  font-weight:600;
+  font-size:14px;
+  color: var(--night);
+  cursor:pointer;
+  border-bottom: 3px solid transparent;
+  transition: all .15s;
+}
+nav.tabs button.active{
+  background: var(--papel-2);
+  border-bottom-color: var(--terracota);
+  color: var(--terracota-dark);
+}
+main{
+  max-width:900px;
+  margin: 28px auto 60px;
+  padding: 0 20px;
+}
+.panel{ display:none; }
+.panel.active{ display:block; animation: fade .25s ease; }
+@keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:24px;
+  box-shadow: 0 2px 10px rgba(27,42,74,0.08);
+  margin-bottom:20px;
+  border:1px solid rgba(27,42,74,0.06);
+}
+.card h2{
+  font-family:'Fraunces', serif;
+  font-size:22px;
+  margin:0 0 4px;
+  color: var(--night);
+}
+.card .sub{
+  font-size:13px;
+  color:#6b6155;
+  margin:0 0 18px;
+}
+label.field{
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  color: var(--night);
+  margin: 14px 0 6px;
+}
+input[type=text], input[type=tel], textarea{
+  width:100%;
+  padding:11px 13px;
+  border-radius:10px;
+  border:1.5px solid #E3D8C6;
+  font-family:'Inter';
+  font-size:14px;
+  background: var(--papel);
+  color: var(--tinta);
+}
+input:focus, textarea:focus{
+  outline:2px solid var(--cielo);
+  outline-offset:1px;
+  border-color: var(--cielo);
+}
+textarea{ min-height:80px; resize:vertical; }
+
+.grid-options{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px,1fr));
+  gap:10px;
+  margin-top:8px;
+}
+.opt{
+  border:1.5px solid #E3D8C6;
+  border-radius:12px;
+  padding:12px;
+  cursor:pointer;
+  background:#fff;
+  transition: all .12s;
+  position:relative;
+}
+.opt:hover:not(.taken){ border-color: var(--cielo); }
+.opt.selected{
+  border-color: var(--terracota);
+  background: #FDF1E9;
+  box-shadow: 0 0 0 2px rgba(193,80,46,0.15) inset;
+}
+.opt .name{ font-weight:600; font-size:14px; color:var(--night); }
+.opt .taken-tag{
+  display:block;
+  margin-top:5px;
+  font-size:11.5px;
+  color: var(--err);
+  font-weight:600;
+}
+.opt.taken{
+  cursor:not-allowed;
+  opacity:.55;
+  background:#F4F1EC;
+}
+
+button.primary{
+  margin-top:20px;
+  width:100%;
+  padding:13px;
+  border:none;
+  border-radius:12px;
+  background: var(--terracota);
+  color:#fff;
+  font-family:'Inter';
+  font-weight:700;
+  font-size:15px;
+  cursor:pointer;
+  transition: background .15s;
+}
+button.primary:hover{ background: var(--terracota-dark); }
+button.primary:disabled{ background:#c9bfae; cursor:not-allowed; }
+
+.msg{
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:13.5px;
+  font-weight:600;
+  display:none;
+}
+.msg.ok{ display:block; background: var(--ok-bg); color: var(--ok); }
+.msg.err{ display:block; background: var(--err-bg); color: var(--err); }
+
+table{
+  width:100%;
+  border-collapse: collapse;
+  font-size:13px;
+}
+th{
+  text-align:left;
+  padding:9px 10px;
+  background: var(--night);
+  color: var(--papel);
+  font-weight:600;
+  position:sticky; top:0;
+}
+td{
+  padding:9px 10px;
+  border-bottom:1px solid #EDE3D3;
+  vertical-align:top;
+}
+tr:last-child td{ border-bottom:none; }
+.table-wrap{ overflow-x:auto; border-radius:10px; border:1px solid #EDE3D3; max-height:420px; overflow-y:auto; }
+.toolbar{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+button.ghost{
+  border:1.5px solid var(--night);
+  background:#fff;
+  color:var(--night);
+  padding:9px 14px;
+  border-radius:9px;
+  font-weight:600;
+  font-size:13px;
+  cursor:pointer;
+}
+button.ghost:hover{ background:var(--papel-2); }
+button.danger-link{
+  border:none; background:none; color:var(--err); font-size:12px; cursor:pointer; font-weight:600; padding:0;
+}
+.empty{ color:#8a8071; font-size:13px; padding:20px; text-align:center; }
+.lock-gate{ max-width:360px; margin: 40px auto; text-align:center; }
+.count-pill{
+  display:inline-block; background:var(--papel-2); border-radius:20px; padding:3px 11px; font-size:12px; font-weight:700; color:var(--night); margin-left:8px;
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">CEPAMA · Colegio Andino Montessori · 05 de septiembre 2026</div>
+  <h1>Fonda Andina <span>2026</span></h1>
+  <p>Chile y sus colores — inscripción de stands por curso y emprendedores</p>
+</header>
+<div class="picado"></div>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="curso">Inscribir mi curso</button>
+  <button class="tab-btn" data-tab="emprendedor">Emprendedores</button>
+  <button class="tab-btn" data-tab="publico">Stands tomados</button>
+  <button class="tab-btn" data-tab="admin">Panel admin</button>
+</nav>
+
+<main>
+
+  <!-- CURSO -->
+  <section id="tab-curso" class="panel active">
+    <div class="card">
+      <h2>Inscripción por curso</h2>
+      <p class="sub">Cada curso elige 1 stand de comida/actividad y 1 temática de decoración. Una vez tomada, la opción queda bloqueada para los demás cursos.</p>
+
+      <label class="field">Nombre del curso</label>
+      <input type="text" id="cursoNombre" placeholder="Ej: Taller 2 Guayacán">
+
+      <label class="field">Nombre de encargado/a</label>
+      <input type="text" id="cursoEncargado" placeholder="Nombre de quien coordina el stand">
+
+      <label class="field">Teléfono de contacto</label>
+      <input type="tel" id="cursoTelefono" placeholder="+56 9 1234 5678">
+
+      <label class="field">Stand de comida / actividad<span class="count-pill" id="comidaCount"></span></label>
+      <div class="grid-options" id="comidaGrid"></div>
+
+      <label class="field">Temática de decoración<span class="count-pill" id="tematicaCount"></span></label>
+      <div class="grid-options" id="tematicaGrid"></div>
+
+      <button class="primary" id="btnSubmitCurso">Inscribir stand del curso</button>
+      <div class="msg" id="cursoMsg"></div>
+    </div>
+  </section>
+
+  <!-- EMPRENDEDOR -->
+  <section id="tab-emprendedor" class="panel">
+    <div class="card">
+      <h2>Inscripción de emprendedores</h2>
+      <p class="sub">Este flujo es independiente de los cursos. Puedes inscribir tu emprendimiento con tus datos de contacto.</p>
+
+      <label class="field">Nombre</label>
+      <input type="text" id="empNombre" placeholder="Tu nombre">
+
+      <label class="field">Teléfono</label>
+      <input type="tel" id="empTelefono" placeholder="+56 9 1234 5678">
+
+      <label class="field">Cuéntanos de qué se trata tu emprendimiento</label>
+      <textarea id="empDetalle" placeholder="Ej: Repostería casera, accesorios artesanales, etc."></textarea>
+
+      <button class="primary" id="btnSubmitEmp">Inscribir emprendimiento</button>
+      <div class="msg" id="empMsg"></div>
+    </div>
+  </section>
+
+  <!-- PUBLICO -->
+  <section id="tab-publico" class="panel">
+    <div class="card">
+      <h2>Stands ya tomados</h2>
+      <p class="sub">Vista pública, solo para consultar — sin necesidad de contraseña.</p>
+      <div class="toolbar">
+        <button class="ghost" id="btnRefreshPublico">Actualizar</button>
+      </div>
+
+      <label class="field" style="margin-top:0;">Comida / actividad<span class="count-pill" id="pubComidaCount"></span></label>
+      <div class="table-wrap"><table id="tablaPubComida"><thead><tr><th>Stand</th><th>Estado</th><th>Curso</th></tr></thead><tbody></tbody></table></div>
+
+      <label class="field">Temática de decoración<span class="count-pill" id="pubTematicaCount"></span></label>
+      <div class="table-wrap"><table id="tablaPubTematica"><thead><tr><th>Temática</th><th>Estado</th><th>Curso</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="tab-admin" class="panel">
+    <div class="card lock-gate" id="adminGate">
+      <h2>Panel administrador</h2>
+      <p class="sub">Ingresa la clave de CEPAMA para ver las inscripciones.</p>
+      <input type="text" id="adminPass" placeholder="Clave de administrador">
+      <button class="primary" id="btnAdminEnter">Entrar</button>
+      <div class="msg" id="adminMsg"></div>
+    </div>
+
+    <div id="adminContent" style="display:none;">
+      <div class="card">
+        <div class="toolbar">
+          <h2 style="margin:0; flex:1;">Cursos inscritos</h2>
+          <button class="ghost" id="btnRefresh">Actualizar</button>
+          <button class="ghost" id="btnExportCursos">Descargar CSV cursos</button>
+        </div>
+        <div class="table-wrap"><table id="tablaCursos"><thead><tr>
+          <th>Curso</th><th>Comida/Stand</th><th>Temática</th><th>Encargado</th><th>Teléfono</th><th>Fecha</th><th></th>
+        </tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <h2 style="margin:0; flex:1;">Emprendedores inscritos</h2>
+          <button class="ghost" id="btnExportEmp">Descargar CSV emprendedores</button>
+        </div>
+        <div class="table-wrap"><table id="tablaEmp"><thead><tr>
+          <th>Nombre</th><th>Teléfono</th><th>Detalle</th><th>Fecha</th><th></th>
+        </tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const ADMIN_PASSWORD = "cepama2026";
+
+const COMIDA_OPTS = [
+  "Mote con huesillo","Choripán","Dulces chilenos","Pasteles","Empanadas",
+  "Terremotos sin alcohol","Sopaipillas","Anticuchos","Juegos típicos","Completos"
+];
+const TEMATICA_OPTS = [
+  "Norte Grande: desierto y altiplano","Fiesta de La Tirana","Valle Central y campo chileno",
+  "Chiloé mágico","Patagonia y sus glaciares","Rapa Nui","Pueblos originarios de Chile",
+  "Mar chileno y caletas","Flora y fauna chilena","Oficios tradicionales"
+];
+
+function slug(s){ return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+function fmtDate(ts){ return new Date(ts).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'}); }
+function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---- tabs ----
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='curso') renderCursoOptions();
+    if(btn.dataset.tab==='publico') renderPublico();
+  });
+});
+
+// ---- backend (Google Apps Script) ----
+const API_URL = 'https://script.google.com/macros/s/AKfycbyXtk1zzfViMPVVaNJiSSj_hKVUZtQ-JqdHPuUTKu-6-BfRYitqHg0gw8Rfej7hCIkBDA/exec';
+
+async function apiGet(){
+  try{
+    const res = await fetch(API_URL);
+    return await res.json();
+  }catch(e){ return { ok:false, error:'No se pudo conectar con la planilla.' }; }
+}
+async function apiPost(payload){
+  try{
+    const res = await fetch(API_URL, { method:'POST', body: JSON.stringify(payload) });
+    return await res.json();
+  }catch(e){ return { ok:false, error:'No se pudo conectar con la planilla.' }; }
+}
+
+let comidaSel = null, tematicaSel = null;
+
+async function renderCursoOptions(){
+  const data = await apiGet();
+  const tomadosComida = data.tomadosComida || {};
+  const tomadosTematica = data.tomadosTematica || {};
+
+  const comidaGrid = document.getElementById('comidaGrid');
+  comidaGrid.innerHTML = '';
+  COMIDA_OPTS.forEach(opt=>{
+    const taken = tomadosComida[opt];
+    const div = document.createElement('div');
+    div.className = 'opt' + (taken ? ' taken' : '') + (comidaSel===opt ? ' selected' : '');
+    div.innerHTML = `<span class="name">${esc(opt)}</span>` + (taken ? `<span class="taken-tag">Ya tomado por ${esc(taken)}</span>` : '');
+    if(!taken){
+      div.addEventListener('click', ()=>{ comidaSel = opt; renderCursoOptions(); });
+    }
+    comidaGrid.appendChild(div);
+  });
+  document.getElementById('comidaCount').textContent = `${Object.keys(tomadosComida).length}/${COMIDA_OPTS.length} tomados`;
+
+  const tematicaGrid = document.getElementById('tematicaGrid');
+  tematicaGrid.innerHTML = '';
+  TEMATICA_OPTS.forEach(opt=>{
+    const taken = tomadosTematica[opt];
+    const div = document.createElement('div');
+    div.className = 'opt' + (taken ? ' taken' : '') + (tematicaSel===opt ? ' selected' : '');
+    div.innerHTML = `<span class="name">${esc(opt)}</span>` + (taken ? `<span class="taken-tag">Ya tomado por ${esc(taken)}</span>` : '');
+    if(!taken){
+      div.addEventListener('click', ()=>{ tematicaSel = opt; renderCursoOptions(); });
+    }
+    tematicaGrid.appendChild(div);
+  });
+  document.getElementById('tematicaCount').textContent = `${Object.keys(tomadosTematica).length}/${TEMATICA_OPTS.length} tomados`;
+}
+
+function showMsg(el, text, ok){
+  el.textContent = text;
+  el.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+
+document.getElementById('btnSubmitCurso').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btnSubmitCurso');
+  const msgEl = document.getElementById('cursoMsg');
+  const curso = document.getElementById('cursoNombre').value.trim();
+  const encargado = document.getElementById('cursoEncargado').value.trim();
+  const telefono = document.getElementById('cursoTelefono').value.trim();
+
+  if(!curso){ showMsg(msgEl, 'Ingresa el nombre del curso.', false); return; }
+  if(!comidaSel){ showMsg(msgEl, 'Elige un stand de comida/actividad.', false); return; }
+  if(!tematicaSel){ showMsg(msgEl, 'Elige una temática de decoración.', false); return; }
+
+  btn.disabled = true;
+  const resp = await apiPost({ action:'addCurso', curso, comida: comidaSel, tematica: tematicaSel, encargado, telefono });
+
+  if(!resp.ok){
+    showMsg(msgEl, resp.error || 'No se pudo inscribir el curso, intenta de nuevo.', false);
+    await renderCursoOptions();
+    btn.disabled = false; return;
+  }
+
+  showMsg(msgEl, `¡Listo! ${curso} quedó inscrito con "${comidaSel}" y "${tematicaSel}".`, true);
+  document.getElementById('cursoNombre').value='';
+  document.getElementById('cursoEncargado').value='';
+  document.getElementById('cursoTelefono').value='';
+  comidaSel = null; tematicaSel = null;
+  await renderCursoOptions();
+  btn.disabled = false;
+});
+
+document.getElementById('btnSubmitEmp').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btnSubmitEmp');
+  const msgEl = document.getElementById('empMsg');
+  const nombre = document.getElementById('empNombre').value.trim();
+  const telefono = document.getElementById('empTelefono').value.trim();
+  const detalle = document.getElementById('empDetalle').value.trim();
+
+  if(!nombre){ showMsg(msgEl, 'Ingresa tu nombre.', false); return; }
+  if(!telefono){ showMsg(msgEl, 'Ingresa tu teléfono.', false); return; }
+  if(!detalle){ showMsg(msgEl, 'Cuéntanos de qué se trata tu emprendimiento.', false); return; }
+
+  btn.disabled = true;
+  const resp = await apiPost({ action:'addEmprendedor', nombre, telefono, detalle });
+
+  if(resp.ok){
+    showMsg(msgEl, `¡Gracias ${nombre}! Tu emprendimiento fue inscrito.`, true);
+    document.getElementById('empNombre').value='';
+    document.getElementById('empTelefono').value='';
+    document.getElementById('empDetalle').value='';
+  } else {
+    showMsg(msgEl, resp.error || 'Hubo un problema guardando tu inscripción. Intenta de nuevo.', false);
+  }
+  btn.disabled = false;
+});
+
+// ---- vista publica ----
+async function renderPublico(){
+  const data = await apiGet();
+  const tomadosComida = data.tomadosComida || {};
+  const tomadosTematica = data.tomadosTematica || {};
+
+  const tbodyC = document.querySelector('#tablaPubComida tbody');
+  tbodyC.innerHTML = COMIDA_OPTS.map(opt=>{
+    const curso = tomadosComida[opt];
+    return `<tr><td>${esc(opt)}</td>
+      <td>${curso ? '<span style="color:var(--err);font-weight:600;">Tomado</span>' : '<span style="color:var(--ok);font-weight:600;">Disponible</span>'}</td>
+      <td>${curso ? esc(curso) : '—'}</td></tr>`;
+  }).join('');
+  document.getElementById('pubComidaCount').textContent = `${Object.keys(tomadosComida).length}/${COMIDA_OPTS.length} tomados`;
+
+  const tbodyT = document.querySelector('#tablaPubTematica tbody');
+  tbodyT.innerHTML = TEMATICA_OPTS.map(opt=>{
+    const curso = tomadosTematica[opt];
+    return `<tr><td>${esc(opt)}</td>
+      <td>${curso ? '<span style="color:var(--err);font-weight:600;">Tomado</span>' : '<span style="color:var(--ok);font-weight:600;">Disponible</span>'}</td>
+      <td>${curso ? esc(curso) : '—'}</td></tr>`;
+  }).join('');
+  document.getElementById('pubTematicaCount').textContent = `${Object.keys(tomadosTematica).length}/${TEMATICA_OPTS.length} tomados`;
+}
+document.getElementById('btnRefreshPublico').addEventListener('click', renderPublico);
+
+// ---- admin ----
+document.getElementById('btnAdminEnter').addEventListener('click', ()=>{
+  const val = document.getElementById('adminPass').value;
+  const msgEl = document.getElementById('adminMsg');
+  if(val === ADMIN_PASSWORD){
+    document.getElementById('adminGate').style.display='none';
+    document.getElementById('adminContent').style.display='block';
+    loadAdmin();
+  } else {
+    showMsg(msgEl, 'Clave incorrecta.', false);
+  }
+});
+
+async function loadAdmin(){
+  const data = await apiGet();
+  if(!data.ok){
+    document.querySelector('#tablaCursos tbody').innerHTML = `<tr><td colspan="7" class="empty">${esc(data.error || 'No se pudo cargar la información.')}</td></tr>`;
+    return;
+  }
+  const cursos = data.cursos || [];
+  const emps = data.emprendedores || [];
+
+  const tbodyC = document.querySelector('#tablaCursos tbody');
+  tbodyC.innerHTML = cursos.length ? cursos.map(c=>`
+    <tr>
+      <td>${esc(c.Curso)}</td><td>${esc(c.Comida)}</td><td>${esc(c.Tematica)}</td>
+      <td>${esc(c.Encargado)}</td><td>${esc(c.Telefono)}</td><td>${fmtDate(c.Timestamp)}</td>
+      <td><button class="danger-link" data-row="${c._row}" onclick="borrarCurso(this)">Eliminar</button></td>
+    </tr>`).join('') : `<tr><td colspan="7" class="empty">Aún no hay cursos inscritos.</td></tr>`;
+
+  const tbodyE = document.querySelector('#tablaEmp tbody');
+  tbodyE.innerHTML = emps.length ? emps.map(e=>`
+    <tr>
+      <td>${esc(e.Nombre)}</td><td>${esc(e.Telefono)}</td><td>${esc(e.Detalle)}</td><td>${fmtDate(e.Timestamp)}</td>
+      <td><button class="danger-link" data-row="${e._row}" onclick="borrarEmp(this)">Eliminar</button></td>
+    </tr>`).join('') : `<tr><td colspan="5" class="empty">Aún no hay emprendedores inscritos.</td></tr>`;
+
+  window._cursosCache = cursos;
+  window._empCache = emps;
+}
+
+async function borrarCurso(btn){
+  if(!confirm('¿Eliminar esta inscripción de curso? Esto liberará su stand y temática.')) return;
+  await apiPost({ action:'deleteCurso', row: Number(btn.dataset.row) });
+  loadAdmin();
+}
+async function borrarEmp(btn){
+  if(!confirm('¿Eliminar este emprendedor?')) return;
+  await apiPost({ action:'deleteEmprendedor', row: Number(btn.dataset.row) });
+  loadAdmin();
+}
+
+document.getElementById('btnRefresh').addEventListener('click', loadAdmin);
+
+function downloadCSV(filename, rows){
+  const csv = rows.map(r => r.map(v => `"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('btnExportCursos').addEventListener('click', ()=>{
+  const rows = [['Curso','Comida/Stand','Temática','Encargado','Teléfono','Fecha']];
+  (window._cursosCache||[]).forEach(c=> rows.push([c.Curso,c.Comida,c.Tematica,c.Encargado,c.Telefono,fmtDate(c.Timestamp)]));
+  downloadCSV('fonda-andina-cursos.csv', rows);
+});
+document.getElementById('btnExportEmp').addEventListener('click', ()=>{
+  const rows = [['Nombre','Teléfono','Detalle','Fecha']];
+  (window._empCache||[]).forEach(e=> rows.push([e.Nombre,e.Telefono,e.Detalle,fmtDate(e.Timestamp)]));
+  downloadCSV('fonda-andina-emprendedores.csv', rows);
+});
+
+renderCursoOptions();
+</script>
+</body>
+</html>
