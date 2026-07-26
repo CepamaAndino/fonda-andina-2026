@@ -269,13 +269,14 @@ button.danger-link{
 .mapa-grid{
   display:grid;
   grid-template-columns: 1.1fr 1fr 1fr 1fr 1.1fr;
-  grid-template-rows: 70px repeat(4, 66px);
+  grid-template-rows: 70px repeat(4, 66px) 66px;
   grid-template-areas:
     "cancha cancha cancha cancha casino"
-    "t1 emp1 emp2 . emp3"
-    "t2 t5 circ t6 emp4"
-    "t3 juegos circ . emp5"
-    "t4 beb t7 t8 emp6";
+    "t1 emp1 emp2 . ."
+    "t2 t5 circ t6 emp3"
+    "t3 circ circ . emp4"
+    "t4 beb t7 t8 emp5"
+    "juegos . . . emp6";
   gap:10px;
   min-width:640px;
 }
@@ -425,7 +426,7 @@ button.danger-link{
           <button class="ghost" id="btnExportEmp">Descargar CSV emprendedores</button>
         </div>
         <div class="table-wrap"><table id="tablaEmp"><thead><tr>
-          <th>Nombre</th><th>Teléfono</th><th>Detalle</th><th>Fecha</th><th></th>
+          <th>Nombre</th><th>Teléfono</th><th>Posición</th><th>Detalle</th><th>Fecha</th><th></th>
         </tr></thead><tbody></tbody></table></div>
       </div>
     </div>
@@ -581,7 +582,7 @@ document.getElementById('btnSubmitEmp').addEventListener('click', async ()=>{
   const resp = await apiPost({ action:'addEmprendedor', nombre, telefono, detalle });
 
   if(resp.ok){
-    showMsg(msgEl, `¡Gracias ${nombre}! Tu emprendimiento fue inscrito.`, true);
+    showMsg(msgEl, `¡Gracias ${nombre}! Tu emprendimiento fue inscrito en el puesto "${resp.posicion}".`, true);
     document.getElementById('empNombre').value='';
     document.getElementById('empTelefono').value='';
     document.getElementById('empDetalle').value='';
@@ -605,14 +606,18 @@ const MAPA_BOXES = [
   {area:'beb', label:'Bebestible CEPAMA', key:'Bebestible CEPAMA'},
 ];
 const MAPA_EMPRENDEDORES = [
-  {area:'emp1', label:'Emprendedores'}, {area:'emp2', label:'Emprendedores'},
-  {area:'emp3', label:'Emprendedores'}, {area:'emp4', label:'Emprendedores'},
-  {area:'emp5', label:'Emprendedores'}, {area:'emp6', label:'Emprendedores'},
+  {area:'emp1', label:'1', key:'Emprendedores 1'},
+  {area:'emp2', label:'2', key:'Emprendedores 2'},
+  {area:'emp3', label:'3', key:'Emprendedores 3'},
+  {area:'emp4', label:'4', key:'Emprendedores 4'},
+  {area:'emp5', label:'5', key:'Emprendedores 5'},
+  {area:'emp6', label:'6', key:'Emprendedores 6'},
 ];
 
 async function renderMapa(){
   const data = await apiGet();
   const posicionesCurso = data.posicionesCurso || {};
+  const posicionesEmprendedor = data.posicionesEmprendedor || {};
   const grid = document.getElementById('mapaGrid');
   grid.innerHTML = `
     <div class="mapa-box fixed" id="mapa-cancha"><span class="val">Cancha</span></div>
@@ -629,10 +634,11 @@ async function renderMapa(){
     grid.appendChild(div);
   });
   MAPA_EMPRENDEDORES.forEach(box=>{
+    const ocupante = posicionesEmprendedor[box.key];
     const div = document.createElement('div');
-    div.className = 'mapa-box emprendedor';
+    div.className = 'mapa-box emprendedor' + (ocupante ? '' : ' disponible');
     div.style.gridArea = box.area;
-    div.innerHTML = `<span class="lbl">${esc(box.label)}</span>`;
+    div.innerHTML = `<span class="lbl">Emprendedores ${esc(box.label)}</span><span class="val">${ocupante ? esc(ocupante) : 'Disponible'}</span>`;
     grid.appendChild(div);
   });
 }
@@ -698,9 +704,9 @@ async function loadAdmin(){
   const tbodyE = document.querySelector('#tablaEmp tbody');
   tbodyE.innerHTML = emps.length ? emps.map(e=>`
     <tr>
-      <td>${esc(e.Nombre)}</td><td>${esc(e.Telefono)}</td><td>${esc(e.Detalle)}</td><td>${fmtDate(e.Timestamp)}</td>
+      <td>${esc(e.Nombre)}</td><td>${esc(e.Telefono)}</td><td>${esc(e.Posicion)}</td><td>${esc(e.Detalle)}</td><td>${fmtDate(e.Timestamp)}</td>
       <td><button class="danger-link" data-row="${e._row}" onclick="borrarEmp(this)">Eliminar</button></td>
-    </tr>`).join('') : `<tr><td colspan="5" class="empty">Aún no hay emprendedores inscritos.</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">Aún no hay emprendedores inscritos.</td></tr>`;
 
   window._cursosCache = cursos;
   window._empCache = emps;
@@ -735,8 +741,8 @@ document.getElementById('btnExportCursos').addEventListener('click', ()=>{
   downloadCSV('fonda-andina-cursos.csv', rows);
 });
 document.getElementById('btnExportEmp').addEventListener('click', ()=>{
-  const rows = [['Nombre','Teléfono','Detalle','Fecha']];
-  (window._empCache||[]).forEach(e=> rows.push([e.Nombre,e.Telefono,e.Detalle,fmtDate(e.Timestamp)]));
+  const rows = [['Nombre','Teléfono','Posición','Detalle','Fecha']];
+  (window._empCache||[]).forEach(e=> rows.push([e.Nombre,e.Telefono,e.Posicion,e.Detalle,fmtDate(e.Timestamp)]));
   downloadCSV('fonda-andina-emprendedores.csv', rows);
 });
 
