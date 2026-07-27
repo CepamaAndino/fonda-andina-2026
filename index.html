@@ -449,7 +449,7 @@ const TEMATICA_OPTS = [
 const ENCHUFE_POSITIONS = ["Taller 3","Taller 8"];
 
 function fmtDate(ts){ return new Date(ts).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'}); }
-function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function esc(s){ return String(s==null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ---- tabs ----
 document.querySelectorAll('.tab-btn').forEach(btn=>{
