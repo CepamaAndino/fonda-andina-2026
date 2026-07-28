@@ -323,7 +323,11 @@ button.danger-link{
 
   <!-- CURSO -->
   <section id="tab-curso" class="panel active">
-    <div class="card">
+    <div class="card" id="cursoCerradoCard" style="display:none;">
+      <h2>Inscripción por curso</h2>
+      <p class="sub" id="cursoCerradoMsg"></p>
+    </div>
+    <div class="card" id="cursoFormCard">
       <h2>Inscripción por curso</h2>
       <p class="sub">Cada curso elige 1 stand de comida/actividad y 1 temática de decoración. Una vez tomada, la opción queda bloqueada para los demás cursos.</p>
 
@@ -338,6 +342,11 @@ button.danger-link{
 
       <label class="field">Stand de comida / actividad<span class="count-pill" id="comidaCount"></span></label>
       <div class="grid-options" id="comidaGrid"></div>
+
+      <div id="otroDetalleWrap" style="display:none;">
+        <label class="field">Cuéntanos qué es tu "Otros"</label>
+        <input type="text" id="otroDetalle" placeholder="Ej: Tejido a palillo, pintura de caritas, etc.">
+      </div>
 
       <label class="field">Temática de decoración<span class="count-pill" id="tematicaCount"></span></label>
       <div class="grid-options" id="tematicaGrid"></div>
@@ -364,6 +373,10 @@ button.danger-link{
 
       <label class="field">Cuéntanos de qué se trata tu emprendimiento</label>
       <textarea id="empDetalle" placeholder="Ej: Repostería casera, accesorios artesanales, etc."></textarea>
+
+      <p class="sub" style="background:var(--err-bg); color:var(--err); padding:10px 12px; border-radius:10px; font-weight:600;">
+        Importante: los emprendedores no pueden vender alimentos ni bebestibles — esas categorías están reservadas para los stands de los cursos.
+      </p>
 
       <button class="primary" id="btnSubmitEmp">Inscribir emprendimiento</button>
       <div class="msg" id="empMsg"></div>
@@ -416,7 +429,7 @@ button.danger-link{
           <button class="ghost" id="btnExportCursos">Descargar CSV cursos</button>
         </div>
         <div class="table-wrap"><table id="tablaCursos"><thead><tr>
-          <th>Curso</th><th>Comida/Stand</th><th>Temática</th><th>Encargado</th><th>Teléfono</th><th>Fecha</th><th></th>
+          <th>Curso</th><th>Comida/Stand</th><th>Detalle Otros</th><th>Temática</th><th>Encargado</th><th>Teléfono</th><th>Fecha</th><th></th>
         </tr></thead><tbody></tbody></table></div>
       </div>
 
@@ -439,7 +452,8 @@ const ADMIN_PASSWORD = "cepama2026";
 
 const COMIDA_OPTS = [
   "Mote con huesillo","Choripán","Dulces chilenos","Pasteles","Empanadas",
-  "Terremotos sin alcohol","Sopaipillas","Anticuchos","Juegos típicos","Completos"
+  "Terremotos sin alcohol","Sopaipillas","Anticuchos","Juegos típicos","Completos",
+  "Otros 1","Otros 2"
 ];
 const TEMATICA_OPTS = [
   "Norte Grande: desierto y altiplano","Fiesta de La Tirana","Valle Central y campo chileno",
@@ -451,6 +465,31 @@ const ENCHUFE_POSITIONS = ["Taller 3","Taller 8"];
 function fmtDate(ts){ return new Date(ts).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'}); }
 function esc(s){ return String(s==null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+// ---- ventana de inscripción de cursos ----
+const INSCRIPCION_INICIO = new Date('2026-07-31T00:00:00');
+const INSCRIPCION_FIN = new Date('2026-08-15T23:59:59');
+
+function chequearVentanaCurso(){
+  const ahora = new Date();
+  const abierto = ahora >= INSCRIPCION_INICIO && ahora <= INSCRIPCION_FIN;
+  const formCard = document.getElementById('cursoFormCard');
+  const cerradoCard = document.getElementById('cursoCerradoCard');
+  const cerradoMsg = document.getElementById('cursoCerradoMsg');
+  if(abierto){
+    formCard.style.display = 'block';
+    cerradoCard.style.display = 'none';
+  } else {
+    formCard.style.display = 'none';
+    cerradoCard.style.display = 'block';
+    if(ahora < INSCRIPCION_INICIO){
+      cerradoMsg.textContent = 'Las inscripciones de stands por curso abren el 31 de julio y cierran el 15 de agosto de 2026. ¡Vuelve pronto!';
+    } else {
+      cerradoMsg.textContent = 'El periodo de inscripción de stands por curso (31 de julio al 15 de agosto de 2026) ya cerró.';
+    }
+  }
+  return abierto;
+}
+
 // ---- tabs ----
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -458,7 +497,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab==='curso') renderCursoOptions();
+    if(btn.dataset.tab==='curso'){ chequearVentanaCurso(); renderCursoOptions(); }
     if(btn.dataset.tab==='publico') renderPublico();
   });
 });
@@ -499,6 +538,7 @@ async function renderCursoOptions(){
     comidaGrid.appendChild(div);
   });
   document.getElementById('comidaCount').textContent = `${Object.keys(tomadosComida).length}/${COMIDA_OPTS.length} tomados`;
+  document.getElementById('otroDetalleWrap').style.display = (comidaSel && comidaSel.startsWith('Otros')) ? 'block' : 'none';
 
   const tematicaGrid = document.getElementById('tematicaGrid');
   tematicaGrid.innerHTML = '';
@@ -540,17 +580,20 @@ function showMsg(el, text, ok){
 document.getElementById('btnSubmitCurso').addEventListener('click', async ()=>{
   const btn = document.getElementById('btnSubmitCurso');
   const msgEl = document.getElementById('cursoMsg');
+  if(!chequearVentanaCurso()){ return; }
   const curso = document.getElementById('cursoNombre').value.trim();
   const encargado = document.getElementById('cursoEncargado').value.trim();
   const telefono = document.getElementById('cursoTelefono').value.trim();
+  const otroDetalle = document.getElementById('otroDetalle').value.trim();
 
   if(!curso){ showMsg(msgEl, 'Ingresa el nombre del curso.', false); return; }
   if(!comidaSel){ showMsg(msgEl, 'Elige un stand de comida/actividad.', false); return; }
+  if(comidaSel.startsWith('Otros') && !otroDetalle){ showMsg(msgEl, 'Cuéntanos qué es tu "Otros".', false); return; }
   if(!tematicaSel){ showMsg(msgEl, 'Elige una temática de decoración.', false); return; }
   if(!enchufeSel){ showMsg(msgEl, 'Indica si necesitas enchufe/corriente (Sí o No).', false); return; }
 
   btn.disabled = true;
-  const resp = await apiPost({ action:'addCurso', curso, comida: comidaSel, tematica: tematicaSel, encargado, telefono, enchufe: enchufeSel });
+  const resp = await apiPost({ action:'addCurso', curso, comida: comidaSel, tematica: tematicaSel, encargado, telefono, enchufe: enchufeSel, otroDetalle: comidaSel.startsWith('Otros') ? otroDetalle : '' });
 
   if(!resp.ok){
     showMsg(msgEl, resp.error || 'No se pudo inscribir el curso, intenta de nuevo.', false);
@@ -562,6 +605,7 @@ document.getElementById('btnSubmitCurso').addEventListener('click', async ()=>{
   document.getElementById('cursoNombre').value='';
   document.getElementById('cursoEncargado').value='';
   document.getElementById('cursoTelefono').value='';
+  document.getElementById('otroDetalle').value='';
   comidaSel = null; tematicaSel = null; enchufeSel = null;
   await renderCursoOptions();
   btn.disabled = false;
@@ -687,7 +731,7 @@ document.getElementById('btnAdminEnter').addEventListener('click', ()=>{
 async function loadAdmin(){
   const data = await apiGet();
   if(!data.ok){
-    document.querySelector('#tablaCursos tbody').innerHTML = `<tr><td colspan="7" class="empty">${esc(data.error || 'No se pudo cargar la información.')}</td></tr>`;
+    document.querySelector('#tablaCursos tbody').innerHTML = `<tr><td colspan="8" class="empty">${esc(data.error || 'No se pudo cargar la información.')}</td></tr>`;
     return;
   }
   const cursos = data.cursos || [];
@@ -696,10 +740,10 @@ async function loadAdmin(){
   const tbodyC = document.querySelector('#tablaCursos tbody');
   tbodyC.innerHTML = cursos.length ? cursos.map(c=>`
     <tr>
-      <td>${esc(c.Curso)}</td><td>${esc(c.Comida)}</td><td>${esc(c.Tematica)}</td>
+      <td>${esc(c.Curso)}</td><td>${esc(c.Comida)}</td><td>${esc(c.OtroDetalle)}</td><td>${esc(c.Tematica)}</td>
       <td>${esc(c.Encargado)}</td><td>${esc(c.Telefono)}</td><td>${fmtDate(c.Timestamp)}</td>
       <td><button class="danger-link" data-row="${c._row}" onclick="borrarCurso(this)">Eliminar</button></td>
-    </tr>`).join('') : `<tr><td colspan="7" class="empty">Aún no hay cursos inscritos.</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="8" class="empty">Aún no hay cursos inscritos.</td></tr>`;
 
   const tbodyE = document.querySelector('#tablaEmp tbody');
   tbodyE.innerHTML = emps.length ? emps.map(e=>`
@@ -736,8 +780,8 @@ function downloadCSV(filename, rows){
 }
 
 document.getElementById('btnExportCursos').addEventListener('click', ()=>{
-  const rows = [['Curso','Comida/Stand','Temática','Encargado','Teléfono','Fecha']];
-  (window._cursosCache||[]).forEach(c=> rows.push([c.Curso,c.Comida,c.Tematica,c.Encargado,c.Telefono,fmtDate(c.Timestamp)]));
+  const rows = [['Curso','Comida/Stand','Detalle Otros','Temática','Encargado','Teléfono','Fecha']];
+  (window._cursosCache||[]).forEach(c=> rows.push([c.Curso,c.Comida,c.OtroDetalle,c.Tematica,c.Encargado,c.Telefono,fmtDate(c.Timestamp)]));
   downloadCSV('fonda-andina-cursos.csv', rows);
 });
 document.getElementById('btnExportEmp').addEventListener('click', ()=>{
@@ -746,6 +790,7 @@ document.getElementById('btnExportEmp').addEventListener('click', ()=>{
   downloadCSV('fonda-andina-emprendedores.csv', rows);
 });
 
+chequearVentanaCurso();
 renderCursoOptions();
 </script>
 </body>
