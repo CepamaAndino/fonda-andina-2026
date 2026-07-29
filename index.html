@@ -326,6 +326,7 @@ button.danger-link{
     <div class="card" id="cursoCerradoCard" style="display:none;">
       <h2>Inscripción por curso</h2>
       <p class="sub" id="cursoCerradoMsg"></p>
+      <button class="ghost" id="btnAdminBypass">¿Eres administrador? Probar formulario igual</button>
     </div>
     <div class="card" id="cursoFormCard">
       <h2>Inscripción por curso</h2>
@@ -468,10 +469,11 @@ function esc(s){ return String(s==null ? '' : s).replace(/[&<>"']/g, c => ({'&':
 // ---- ventana de inscripción de cursos ----
 const INSCRIPCION_INICIO = new Date('2026-07-31T00:00:00');
 const INSCRIPCION_FIN = new Date('2026-08-15T23:59:59');
+let adminBypass = false;
 
 function chequearVentanaCurso(){
   const ahora = new Date();
-  const abierto = ahora >= INSCRIPCION_INICIO && ahora <= INSCRIPCION_FIN;
+  const abierto = (ahora >= INSCRIPCION_INICIO && ahora <= INSCRIPCION_FIN) || adminBypass;
   const formCard = document.getElementById('cursoFormCard');
   const cerradoCard = document.getElementById('cursoCerradoCard');
   const cerradoMsg = document.getElementById('cursoCerradoMsg');
@@ -489,6 +491,15 @@ function chequearVentanaCurso(){
   }
   return abierto;
 }
+document.getElementById('btnAdminBypass').addEventListener('click', ()=>{
+  const val = window.prompt('Clave de administrador:');
+  if(val === ADMIN_PASSWORD){
+    adminBypass = true;
+    chequearVentanaCurso();
+  } else if(val !== null){
+    alert('Clave incorrecta.');
+  }
+});
 
 // ---- tabs ----
 document.querySelectorAll('.tab-btn').forEach(btn=>{
