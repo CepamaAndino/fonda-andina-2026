@@ -276,7 +276,7 @@ button.danger-link{
     "t2 t5 circ t6 emp3"
     "t3 . circ . emp4"
     "t4 beb t7 t8 emp5"
-    "juegos . . . emp6";
+    "t9 t10 . . emp6";
   gap:10px;
   min-width:640px;
 }
@@ -326,14 +326,14 @@ button.danger-link{
     <div class="card" id="cursoCerradoCard" style="display:none;">
       <h2>Inscripción por curso</h2>
       <p class="sub" id="cursoCerradoMsg"></p>
-      <button class="ghost" id="btnAdminBypass">¿Eres administrador?</button>
+      <button class="ghost" id="btnAdminBypass">¿Eres administrador? Probar formulario igual</button>
     </div>
     <div class="card" id="cursoFormCard">
       <h2>Inscripción por curso</h2>
       <p class="sub">Cada curso elige 1 stand de comida/actividad y 1 temática de decoración. Una vez tomada, la opción queda bloqueada para los demás cursos.</p>
 
       <label class="field">Nombre del curso</label>
-      <input type="text" id="cursoNombre" placeholder="Ej: Taller 2 Maiten">
+      <input type="text" id="cursoNombre" placeholder="Ej: Taller 2 Guayacán">
 
       <label class="field">Nombre de encargado/a</label>
       <input type="text" id="cursoEncargado" placeholder="Nombre de quien coordina el stand">
@@ -346,11 +346,16 @@ button.danger-link{
 
       <div id="otroDetalleWrap" style="display:none;">
         <label class="field">Cuéntanos qué es tu "Otros"</label>
-        <input type="text" id="otroDetalle" placeholder="Ej: Alimentos tipicos, pintura de caritas, etc.">
+        <input type="text" id="otroDetalle" placeholder="Ej: Tejido a palillo, pintura de caritas, etc.">
       </div>
 
       <label class="field">Temática de decoración<span class="count-pill" id="tematicaCount"></span></label>
       <div class="grid-options" id="tematicaGrid"></div>
+
+      <div id="otroTematicaDetalleWrap" style="display:none;">
+        <label class="field">Cuéntanos qué temática es tu "Otros"</label>
+        <input type="text" id="otroTematicaDetalle" placeholder="Ej: Fiestas Patrias urbanas, minería, etc.">
+      </div>
 
       <label class="field">¿Necesitas enchufe / corriente eléctrica?<span class="count-pill" id="enchufeCount"></span></label>
       <div class="grid-options" id="enchufeGrid"></div>
@@ -373,7 +378,7 @@ button.danger-link{
       <input type="tel" id="empTelefono" placeholder="+56 9 1234 5678">
 
       <label class="field">Cuéntanos de qué se trata tu emprendimiento</label>
-      <textarea id="empDetalle" placeholder="Ej: Pinturas, accesorios artesanales, etc."></textarea>
+      <textarea id="empDetalle" placeholder="Ej: Repostería casera, accesorios artesanales, etc."></textarea>
 
       <p class="sub" style="background:var(--err-bg); color:var(--err); padding:10px 12px; border-radius:10px; font-weight:600;">
         Importante: los emprendedores no pueden vender alimentos ni bebestibles — esas categorías están reservadas para los stands de los cursos.
@@ -430,7 +435,7 @@ button.danger-link{
           <button class="ghost" id="btnExportCursos">Descargar CSV cursos</button>
         </div>
         <div class="table-wrap"><table id="tablaCursos"><thead><tr>
-          <th>Curso</th><th>Comida/Stand</th><th>Detalle Otros</th><th>Temática</th><th>Encargado</th><th>Teléfono</th><th>Fecha</th><th></th>
+          <th>Curso</th><th>Comida/Stand</th><th>Detalle Otros</th><th>Temática</th><th>Detalle Otros Temática</th><th>Encargado</th><th>Teléfono</th><th>Fecha</th><th></th>
         </tr></thead><tbody></tbody></table></div>
       </div>
 
@@ -459,7 +464,8 @@ const COMIDA_OPTS = [
 const TEMATICA_OPTS = [
   "Norte Grande: desierto y altiplano","Fiesta de La Tirana","Valle Central y campo chileno",
   "Chiloé mágico","Patagonia y sus glaciares","Rapa Nui","Pueblos originarios de Chile",
-  "Mar chileno y caletas","Flora y fauna chilena","Oficios tradicionales"
+  "Mar chileno y caletas","Flora y fauna chilena","Oficios tradicionales",
+  "Archipiélago Juan Fernández","Otros"
 ];
 const ENCHUFE_POSITIONS = ["Taller 3","Taller 8"];
 
@@ -550,6 +556,7 @@ async function renderCursoOptions(){
   });
   document.getElementById('comidaCount').textContent = `${Object.keys(tomadosComida).length}/${COMIDA_OPTS.length} tomados`;
   document.getElementById('otroDetalleWrap').style.display = (comidaSel && comidaSel.startsWith('Otros')) ? 'block' : 'none';
+  document.getElementById('otroTematicaDetalleWrap').style.display = (tematicaSel === 'Otros') ? 'block' : 'none';
 
   const tematicaGrid = document.getElementById('tematicaGrid');
   tematicaGrid.innerHTML = '';
@@ -596,15 +603,21 @@ document.getElementById('btnSubmitCurso').addEventListener('click', async ()=>{
   const encargado = document.getElementById('cursoEncargado').value.trim();
   const telefono = document.getElementById('cursoTelefono').value.trim();
   const otroDetalle = document.getElementById('otroDetalle').value.trim();
+  const otroTematicaDetalle = document.getElementById('otroTematicaDetalle').value.trim();
 
   if(!curso){ showMsg(msgEl, 'Ingresa el nombre del curso.', false); return; }
   if(!comidaSel){ showMsg(msgEl, 'Elige un stand de comida/actividad.', false); return; }
   if(comidaSel.startsWith('Otros') && !otroDetalle){ showMsg(msgEl, 'Cuéntanos qué es tu "Otros".', false); return; }
   if(!tematicaSel){ showMsg(msgEl, 'Elige una temática de decoración.', false); return; }
+  if(tematicaSel === 'Otros' && !otroTematicaDetalle){ showMsg(msgEl, 'Cuéntanos qué temática es tu "Otros".', false); return; }
   if(!enchufeSel){ showMsg(msgEl, 'Indica si necesitas enchufe/corriente (Sí o No).', false); return; }
 
   btn.disabled = true;
-  const resp = await apiPost({ action:'addCurso', curso, comida: comidaSel, tematica: tematicaSel, encargado, telefono, enchufe: enchufeSel, otroDetalle: comidaSel.startsWith('Otros') ? otroDetalle : '' });
+  const resp = await apiPost({
+    action:'addCurso', curso, comida: comidaSel, tematica: tematicaSel, encargado, telefono, enchufe: enchufeSel,
+    otroDetalle: comidaSel.startsWith('Otros') ? otroDetalle : '',
+    otroTematicaDetalle: tematicaSel === 'Otros' ? otroTematicaDetalle : ''
+  });
 
   if(!resp.ok){
     showMsg(msgEl, resp.error || 'No se pudo inscribir el curso, intenta de nuevo.', false);
@@ -617,6 +630,7 @@ document.getElementById('btnSubmitCurso').addEventListener('click', async ()=>{
   document.getElementById('cursoEncargado').value='';
   document.getElementById('cursoTelefono').value='';
   document.getElementById('otroDetalle').value='';
+  document.getElementById('otroTematicaDetalle').value='';
   comidaSel = null; tematicaSel = null; enchufeSel = null;
   await renderCursoOptions();
   btn.disabled = false;
@@ -657,7 +671,8 @@ const MAPA_BOXES = [
   {area:'t6', label:'6', key:'Taller 6'},
   {area:'t7', label:'7', key:'Taller 7'},
   {area:'t8', label:'8 ⚡', key:'Taller 8'},
-  {area:'juegos', label:'Juegos típicos', key:'Juegos típicos'},
+  {area:'t9', label:'9', key:'Taller 9'},
+  {area:'t10', label:'10', key:'Taller 10'},
   {area:'beb', label:'Bebestible CEPAMA', key:'Bebestible CEPAMA'},
 ];
 const MAPA_EMPRENDEDORES = [
@@ -742,7 +757,7 @@ document.getElementById('btnAdminEnter').addEventListener('click', ()=>{
 async function loadAdmin(){
   const data = await apiGet();
   if(!data.ok){
-    document.querySelector('#tablaCursos tbody').innerHTML = `<tr><td colspan="8" class="empty">${esc(data.error || 'No se pudo cargar la información.')}</td></tr>`;
+    document.querySelector('#tablaCursos tbody').innerHTML = `<tr><td colspan="9" class="empty">${esc(data.error || 'No se pudo cargar la información.')}</td></tr>`;
     return;
   }
   const cursos = data.cursos || [];
@@ -751,10 +766,10 @@ async function loadAdmin(){
   const tbodyC = document.querySelector('#tablaCursos tbody');
   tbodyC.innerHTML = cursos.length ? cursos.map(c=>`
     <tr>
-      <td>${esc(c.Curso)}</td><td>${esc(c.Comida)}</td><td>${esc(c.OtroDetalle)}</td><td>${esc(c.Tematica)}</td>
+      <td>${esc(c.Curso)}</td><td>${esc(c.Comida)}</td><td>${esc(c.OtroDetalle)}</td><td>${esc(c.Tematica)}</td><td>${esc(c.OtroTematicaDetalle)}</td>
       <td>${esc(c.Encargado)}</td><td>${esc(c.Telefono)}</td><td>${fmtDate(c.Timestamp)}</td>
       <td><button class="danger-link" data-row="${c._row}" onclick="borrarCurso(this)">Eliminar</button></td>
-    </tr>`).join('') : `<tr><td colspan="8" class="empty">Aún no hay cursos inscritos.</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="9" class="empty">Aún no hay cursos inscritos.</td></tr>`;
 
   const tbodyE = document.querySelector('#tablaEmp tbody');
   tbodyE.innerHTML = emps.length ? emps.map(e=>`
@@ -791,8 +806,8 @@ function downloadCSV(filename, rows){
 }
 
 document.getElementById('btnExportCursos').addEventListener('click', ()=>{
-  const rows = [['Curso','Comida/Stand','Detalle Otros','Temática','Encargado','Teléfono','Fecha']];
-  (window._cursosCache||[]).forEach(c=> rows.push([c.Curso,c.Comida,c.OtroDetalle,c.Tematica,c.Encargado,c.Telefono,fmtDate(c.Timestamp)]));
+  const rows = [['Curso','Comida/Stand','Detalle Otros','Temática','Detalle Otros Temática','Encargado','Teléfono','Fecha']];
+  (window._cursosCache||[]).forEach(c=> rows.push([c.Curso,c.Comida,c.OtroDetalle,c.Tematica,c.OtroTematicaDetalle,c.Encargado,c.Telefono,fmtDate(c.Timestamp)]));
   downloadCSV('fonda-andina-cursos.csv', rows);
 });
 document.getElementById('btnExportEmp').addEventListener('click', ()=>{
