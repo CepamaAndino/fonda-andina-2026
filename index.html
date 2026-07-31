@@ -269,14 +269,15 @@ button.danger-link{
 .mapa-grid{
   display:grid;
   grid-template-columns: 1.1fr 1fr 1fr 1fr 1.1fr;
-  grid-template-rows: 70px repeat(4, 66px) 66px;
+  grid-template-rows: 70px repeat(4, 66px) 66px 66px;
   grid-template-areas:
     "cancha cancha cancha cancha casino"
     "t1 emp1 emp2 . ."
     "t2 t5 circ t6 emp3"
     "t3 . circ . emp4"
     "t4 beb t7 t8 emp5"
-    "t9 t10 . . emp6";
+    "t9 t10 . . emp6"
+    "t11 t12 . . .";
   gap:10px;
   min-width:640px;
 }
@@ -465,7 +466,7 @@ const TEMATICA_OPTS = [
   "Norte Grande: desierto y altiplano","Fiesta de La Tirana","Valle Central y campo chileno",
   "Chiloé mágico","Patagonia y sus glaciares","Rapa Nui","Pueblos originarios de Chile",
   "Mar chileno y caletas","Flora y fauna chilena","Oficios tradicionales",
-  "Archipiélago Juan Fernández","Otros"
+  "Archipiélago Juan Fernández","Otros 1","Otros 2"
 ];
 const ENCHUFE_POSITIONS = ["Taller 3","Taller 8"];
 
@@ -556,7 +557,7 @@ async function renderCursoOptions(){
   });
   document.getElementById('comidaCount').textContent = `${Object.keys(tomadosComida).length}/${COMIDA_OPTS.length} tomados`;
   document.getElementById('otroDetalleWrap').style.display = (comidaSel && comidaSel.startsWith('Otros')) ? 'block' : 'none';
-  document.getElementById('otroTematicaDetalleWrap').style.display = (tematicaSel === 'Otros') ? 'block' : 'none';
+  document.getElementById('otroTematicaDetalleWrap').style.display = (tematicaSel && tematicaSel.startsWith('Otros')) ? 'block' : 'none';
 
   const tematicaGrid = document.getElementById('tematicaGrid');
   tematicaGrid.innerHTML = '';
@@ -609,14 +610,14 @@ document.getElementById('btnSubmitCurso').addEventListener('click', async ()=>{
   if(!comidaSel){ showMsg(msgEl, 'Elige un stand de comida/actividad.', false); return; }
   if(comidaSel.startsWith('Otros') && !otroDetalle){ showMsg(msgEl, 'Cuéntanos qué es tu "Otros".', false); return; }
   if(!tematicaSel){ showMsg(msgEl, 'Elige una temática de decoración.', false); return; }
-  if(tematicaSel === 'Otros' && !otroTematicaDetalle){ showMsg(msgEl, 'Cuéntanos qué temática es tu "Otros".', false); return; }
+  if(tematicaSel.startsWith('Otros') && !otroTematicaDetalle){ showMsg(msgEl, 'Cuéntanos qué temática es tu "Otros".', false); return; }
   if(!enchufeSel){ showMsg(msgEl, 'Indica si necesitas enchufe/corriente (Sí o No).', false); return; }
 
   btn.disabled = true;
   const resp = await apiPost({
     action:'addCurso', curso, comida: comidaSel, tematica: tematicaSel, encargado, telefono, enchufe: enchufeSel,
     otroDetalle: comidaSel.startsWith('Otros') ? otroDetalle : '',
-    otroTematicaDetalle: tematicaSel === 'Otros' ? otroTematicaDetalle : ''
+    otroTematicaDetalle: tematicaSel.startsWith('Otros') ? otroTematicaDetalle : ''
   });
 
   if(!resp.ok){
@@ -673,6 +674,8 @@ const MAPA_BOXES = [
   {area:'t8', label:'8 ⚡', key:'Taller 8'},
   {area:'t9', label:'9', key:'Taller 9'},
   {area:'t10', label:'10', key:'Taller 10'},
+  {area:'t11', label:'11', key:'Taller 11'},
+  {area:'t12', label:'12', key:'Taller 12'},
   {area:'beb', label:'Bebestible CEPAMA', key:'Bebestible CEPAMA'},
 ];
 const MAPA_EMPRENDEDORES = [
